@@ -1,0 +1,17 @@
+{
+  "name": "contact-form-backend",
+  "version": "1.0.0",
+  "description": "This is used to send mail to my account for my application using contact form",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "nodemailer": "^6.9.16"
+  }
+}
