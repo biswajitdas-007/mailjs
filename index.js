@@ -8,7 +8,7 @@ dotenv.config(); // Load environment variables from .env file
 const app = express();
 
 // Enable CORS for specific origins
-const allowedOrigins = ["https://www.devsynchub.com"];
+const allowedOrigins = ["https://portfolio-nu-ten-32.vercel.app"];
 app.use(
   cors({
     origin: (origin, callback) => {
