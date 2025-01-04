@@ -8,7 +8,7 @@ dotenv.config(); // Load environment variables from .env file
 const app = express();
 
 // Enable CORS for specific origins
-const allowedOrigins = ["http://localhost:3000", "https://www.devsynchub.com"]; // Add your frontend URL here
+const allowedOrigins = ["https://www.devsynchub.com"];
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -23,7 +23,7 @@ app.use(
   })
 );
 
-app.use(express.json()); // To parse incoming JSON request bodies
+app.use(express.json());
 
 const PORT = process.env.PORT || 8080;
 
@@ -39,7 +39,7 @@ const sendEmail = async (name, email, message) => {
 
   const mailOptions = {
     from: process.env.GMAIL_EMAIL,
-    to: process.env.GMAIL_EMAIL, // The email you want to send the message to
+    to: process.env.GMAIL_EMAIL,
     subject: `New Contact Form Submission from ${name}`,
     html: `<h3>Message from ${name} (${email})</h3><p>${message}</p>`,
   };
