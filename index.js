@@ -33,7 +33,7 @@ const sendEmail = async (name, email, message) => {
     service: "gmail",
     auth: {
       user: process.env.GMAIL_EMAIL,
-      pass: process.env.GMAIL_PASSWORD, // or app-specific password
+      pass: process.env.GMAIL_PASSWORD,
     },
   });
 
@@ -69,6 +69,22 @@ app.post("/api/send-email", async (req, res) => {
     return res.status(200).json(response);
   } else {
     return res.status(500).json(response);
+  }
+});
+
+app.get("/api/health", async (req, res) => {
+  try {
+    const healthCheck = {
+      uptime: process.uptime(),
+      message: "OK",
+      timestamp: new Date(),
+    };
+    res.status(200).json(healthCheck);
+  } catch (error) {
+    res.status(500).json({
+      message: "Health check failed",
+      error: error.message,
+    });
   }
 });
 
