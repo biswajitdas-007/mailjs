@@ -1,93 +1,36 @@
-const express = require("express");
-const nodemailer = require("nodemailer");
-const dotenv = require("dotenv");
-const cors = require("cors");
+'use strict'
 
-dotenv.config(); // Load environment variables from .env file
+const fs = require('node:fs')
+const nodemailer = require('nodemailer')
+const { createApp } = require('./src/app')
 
-const app = express();
+// local development only; on vercel the environment is injected
+if (fs.existsSync('.env') && typeof process.loadEnvFile === 'function') process.loadEnvFile('.env')
 
-// Enable CORS for specific origins
-const allowedOrigins = ["https://www.biswajitdas.dev"];
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true); // Allow the request
-      } else {
-        callback(new Error("Not allowed by CORS"), false); // Deny the request
-      }
-    },
-    methods: ["GET", "POST", "PUT", "DELETE"], // Allow only specific HTTP methods if necessary
-    allowedHeaders: ["Content-Type", "Authorization"], // Allow specific headers if necessary
-  })
-);
+const { GMAIL_EMAIL, GMAIL_PASSWORD, MAILJS_API_KEY } = process.env
+if (!MAILJS_API_KEY || MAILJS_API_KEY.length < 32) {
+  console.error('[mailjs] MAILJS_API_KEY must be set to a random value of at least 32 characters; refusing to send mail')
+}
 
-app.use(express.json());
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: { user: GMAIL_EMAIL, pass: GMAIL_PASSWORD },
+  connectionTimeout: 10_000,
+  greetingTimeout: 10_000,
+  socketTimeout: 15_000,
+})
 
-const PORT = process.env.PORT || 8080;
+const app = createApp({
+  // fail closed: a missing or weak key disables sending instead of leaving the relay open
+  apiKey: MAILJS_API_KEY && MAILJS_API_KEY.length >= 32 ? MAILJS_API_KEY : undefined,
+  sendMail: (mail) => transporter.sendMail(mail),
+  mailTo: GMAIL_EMAIL,
+  mailFrom: GMAIL_EMAIL,
+})
 
-// Email sending function
-const sendEmail = async (name, email, message) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.GMAIL_EMAIL,
-      pass: process.env.GMAIL_PASSWORD,
-    },
-  });
+if (require.main === module) {
+  const port = Number(process.env.PORT) || 8080
+  app.listen(port, () => console.log(`[mailjs] listening on http://localhost:${port}`))
+}
 
-  const mailOptions = {
-    from: process.env.GMAIL_EMAIL,
-    to: process.env.GMAIL_EMAIL,
-    subject: `New Contact Form Submission from ${name}`,
-    html: `<h3>Message from ${name} (${email})</h3><p>${message}</p>`,
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
-    return { success: true, message: "Email sent successfully!" };
-  } catch (error) {
-    console.error("Error sending email:", error);
-    return { success: false, message: "Failed to send email." };
-  }
-};
-
-// Endpoint to handle contact form submission
-app.post("/api/send-email", async (req, res) => {
-  const { fullname, email, message } = req.body;
-
-  if (!fullname || !email || !message) {
-    return res
-      .status(400)
-      .json({ success: false, message: "All fields are required." });
-  }
-
-  const response = await sendEmail(fullname, email, message);
-
-  if (response.success) {
-    return res.status(200).json(response);
-  } else {
-    return res.status(500).json(response);
-  }
-});
-
-app.get("/api/health", async (req, res) => {
-  try {
-    const healthCheck = {
-      uptime: process.uptime(),
-      message: "OK",
-      timestamp: new Date(),
-    };
-    res.status(200).json(healthCheck);
-  } catch (error) {
-    res.status(500).json({
-      message: "Health check failed",
-      error: error.message,
-    });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+module.exports = app
