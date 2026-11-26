@@ -1,17 +1,19 @@
 {
-  "name": "contact-form-backend",
-  "version": "1.0.0",
-  "description": "This is used to send mail to my account for my application using contact form",
+  "name": "mailjs",
+  "version": "2.0.0",
+  "description": "A small authenticated relay that emails contact-form messages to the owner's inbox.",
   "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
+  "private": true,
+  "engines": {
+    "node": ">=22"
   },
-  "author": "",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test test/*.test.js"
+  },
   "license": "ISC",
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "nodemailer": "^6.9.16"
+    "express": "^5.3.0",
+    "nodemailer": "^10.6.1"
   }
 }
